@@ -1,5 +1,8 @@
+from __future__ import unicode_literals
+
 import base64
 import enum
+import json
 from datetime import datetime
 
 from ._app import app
@@ -18,11 +21,13 @@ class FromIndexMixin(object):
 
 
 class GameStatus(FromIndexMixin, enum.Enum):
-    __order__ = 'BLUE_TEAM RED_TEAM DONE'
+    __order__ = 'BLUE_TEAM_GIVE RED_TEAM_GIVE BLUE_TEAM_GUESS RED_TEAM_GUESS DONE'
 
-    BLUE_TEAM = 0
-    RED_TEAM = 1
-    DONE = 2
+    BLUE_TEAM_GIVE = 0
+    RED_TEAM_GIVE = 1
+    BLUE_TEAM_GUESS = 2
+    RED_TEAM_GUESS = 3
+    DONE = 4
 
 
 class GameWinner(FromIndexMixin, enum.Enum):
@@ -47,7 +52,7 @@ class Game(db.Model):
     __tablename__ = 'games'
 
     id = db.Column(db.Integer, primary_key=True)
-    words_encoded = db.Column(db.String)
+    words_encoded = db.Column(db.Unicode)
     teams_encoded = db.Column(db.BigInteger)
     status_encoded = db.Column(db.SmallInteger)
 
@@ -58,11 +63,11 @@ class Game(db.Model):
     _teams = None
 
     def __init__(self, words, teams):
-        words_encoded = base64.b64encode(b','.join(words))
+        words_encoded = json.dumps(words)
         teams_encoded = 0
         for idx, team in enumerate(teams):
             teams_encoded |= team.value << (2 * idx)
-        status_encoded = GameStatus.BLUE_TEAM.value
+        status_encoded = GameStatus.BLUE_TEAM_GIVE.value
         super(Game, self).__init__(words_encoded=words_encoded,
                                    teams_encoded=teams_encoded,
                                    status_encoded=status_encoded)
@@ -71,7 +76,7 @@ class Game(db.Model):
     def words(self):
         if self._words:
             return self._words
-        self._words = base64.b64decode(self.words_encoded).split(b',')
+        self._words = json.loads(self.words_encoded)
         return self._words
 
     @property
@@ -87,6 +92,10 @@ class Game(db.Model):
     def status(self):
         return GameStatus.from_index(self.status_encoded)
 
+    @status.setter
+    def status(self, stat):
+        self.status_encoded = stat.value
+
 
 class GameMoves(db.Model):
 
@@ -95,7 +104,7 @@ class GameMoves(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     game_id = db.Column(db.Integer, db.ForeignKey(Game.id))
     team_encoded = db.Column(db.Integer)
-    word = db.Column(db.String)
+    word = db.Column(db.Unicode)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __init__(self, *args, **kwargs):
@@ -110,6 +119,6 @@ class GameHint(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     game_id = db.Column(db.Integer, db.ForeignKey(Game.id))
-    word = db.Column(db.String)
+    word = db.Column(db.Unicode)
     number = db.Column(db.Integer)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

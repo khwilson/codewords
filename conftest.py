@@ -1,4 +1,4 @@
-from __future__ import print_function
+from __future__ import print_function, unicode_literals
 
 import os
 import random
@@ -8,6 +8,8 @@ import tempfile
 import time
 
 import pytest
+
+from codewords.app import app, db as the_db
 
 
 @pytest.fixture(scope='session')
@@ -40,3 +42,9 @@ def server(request, database):
     time.sleep(2)
 
     return host, port
+
+
+@pytest.fixture(scope='session')
+def db(database):
+    app.config['SQLALCHEMY_DATABASE_URI'] = database
+    return the_db
