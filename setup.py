@@ -18,11 +18,11 @@ def parse_requirements(filename):
     return reqs
 
 
-with open(os.path.join('codewords', 'VERSION'), 'rb') as f:
+with open(os.path.join('codewords', 'VERSION'), 'r') as f:
     version = f.read().strip()
 
 
-with open('README.md', 'rb') as f:
+with open('README.md', 'r') as f:
     readme = f.read().strip()
 
 

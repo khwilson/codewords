@@ -7,7 +7,7 @@ def test_index_route(server):
     host, port = server
     response = requests.get('http://{host}:{port}/'.format(host=host, port=port))
     assert response.ok
-    assert 'Welcome!' in response.content
+    assert b'Welcome!' in response.content
 
 
 def test_version():

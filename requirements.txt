@@ -9,6 +9,7 @@ click==6.6
 colorama==0.3.7           # via pylint
 cov-core==1.13.0          # via pytest-cov
 coverage==3.7.1           # via cov-core
+enum34==1.1.6
 flask-sqlalchemy==2.1
 flask==0.11
 itsdangerous==0.24        # via flask

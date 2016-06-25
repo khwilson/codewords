@@ -8,3 +8,4 @@ click
 flask
 flask_sqlalchemy
 requests
+enum34
